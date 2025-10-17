@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hinglish → English Chatbot</title>
+    <style>
+        /* ===== Global Styles ===== */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-top: 20px;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+
+        /* ===== Chatbox ===== */
+        #chatbox {
+            width: 90%;
+            max-width: 700px;
+            height: 70%;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 0 15px rgba(0,255,204,0.3);
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            line-height: 1.4;
+        }
+
+        .user {
+            background-color: #272727;
+            color: #00bfff;
+            align-self: flex-end;
+        }
+
+        .bot {
+            background-color: #333333;
+            color: #00ffcc;
+            align-self: flex-start;
+        }
+
+        /* ===== Input Area ===== */
+        #input-area {
+            width: 90%;
+            max-width: 700px;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #message {
+            flex: 1;
+            padding: 12px;
+            border-radius: 25px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background-color: #272727;
+            color: #ffffff;
+        }
+
+        #send-btn {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background-color: #00ffcc;
+            color: #121212;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #send-btn:hover {
+            background-color: #00e6b8;
+        }
+
+        /* Scrollbar Styles */
+        #chatbox::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chatbox::-webkit-scrollbar-thumb {
+            background-color: #00ffcc80;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🤖 Hinglish → English Chatbot</h1>
+
+    <div id="chatbox"></div>
+
+    <div id="input-area">
+        <input type="text" id="message" placeholder="Type your message...">
+        <button id="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById("chatbox");
+        const messageInput = document.getElementById("message");
+
+        function sendMessage() {
+            let message = messageInput.value.trim();
+            if (!message) return;
+
+            // Display user message
+            let userDiv = document.createElement("div");
+            userDiv.className = "message user";
+            userDiv.textContent = "You: " + message;
+            chatbox.appendChild(userDiv);
+
+            messageInput.value = "";
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            // Send to server
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `message=${encodeURIComponent(message)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                let botDiv = document.createElement("div");
+                botDiv.className = "message bot";
+                botDiv.textContent = "Bot: " + data.response;
+                chatbox.appendChild(botDiv);
+                chatbox.scrollTop = chatbox.scrollHeight;
+            });
+        }
+
+        // Press Enter to send
+        messageInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") sendMessage();
+        });
+    </script>
+</body>
+</html>
